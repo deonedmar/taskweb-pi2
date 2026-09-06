@@ -15,5 +15,8 @@ const pool = mysql.createPool({
   connectionLimit: 10,
   queueLimit: 0
 });
+// Health check — confirma que o servidor está rodando
+app.get('/', (_req, res) => res.json({ status: 'ok', mensagem: 'TaskWeb API online.' }));
 
-module.exports = pool;
+module.exports = app;
+;
