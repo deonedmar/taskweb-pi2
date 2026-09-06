@@ -1,4 +1,4 @@
-# TaskWeb - PI2 (UNIVESP)
+# TaskWeb - PI1 (UNIVESP) 
 
 Sistema web para gerenciamento de tarefas academicas com dashboard em HTML/CSS/JS e API REST em Node.js + Express + MySQL.
 
@@ -105,7 +105,7 @@ http://localhost:3000/api/tarefas
 - O backend normaliza prioridade e status, aceitando entradas com ou sem acento.
 - O frontend permite configurar a URL da API com `window.TASKWEB_API_URL` antes de carregar `app.js`.
 
-# TaskWeb - PI2 (UNIVESP)
+# TaskWeb - PI2 (UNIVESP) Atualizado dia 08/09/2026
 
 Sistema web para gerenciamento de tarefas academicas com autenticacao de usuarios, dashboard em HTML/CSS/JS e API REST em Node.js + Express + MySQL.
 
