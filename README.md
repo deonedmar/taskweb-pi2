@@ -1,4 +1,4 @@
-# TaskWeb - PI1 (UNIVESP)
+# TaskWeb - PI2 (UNIVESP)
 
 Sistema web para gerenciamento de tarefas academicas com dashboard em HTML/CSS/JS e API REST em Node.js + Express + MySQL.
 
