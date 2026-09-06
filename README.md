@@ -176,15 +176,15 @@ Campos adicionados a `tarefas`:
 
 ## Como executar o backend
 
-```bash
+bash
 npm install
 copy backend\.env.example backend\.env
 npm run dev
-```
+
 
 Ajuste usuario, senha do MySQL e a chave JWT no arquivo `backend/.env`:
 
-```
+
 PORT=3000
 DB_HOST=localhost
 DB_PORT=3306
@@ -192,7 +192,7 @@ DB_USER=root
 DB_PASSWORD=sua_senha
 DB_NAME=taskweb
 JWT_SECRET=sua_chave_secreta
-```
+
 
 API em:
 
@@ -207,40 +207,40 @@ http://localhost:3000
 
 Exemplo de corpo para registro:
 
-```json
+json
 {
   "nome": "Edmar",
   "email": "edmar@email.com",
   "senha": "minhasenha"
 }
-```
+
 
 Exemplo de corpo para login:
 
-```json
+json
 {
   "email": "edmar@email.com",
   "senha": "minhasenha"
 }
-```
+
 
 Resposta do login:
 
-```json
+json
 {
   "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
   "nome": "Edmar",
   "email": "edmar@email.com"
 }
-```
+
 
 ## Rotas de tarefas (autenticadas)
 
 Todas as rotas abaixo exigem o header:
 
-```
+
 Authorization: Bearer <token>
-```
+
 
 - `GET /api/tarefas`: lista tarefas do usuario autenticado
 - `POST /api/tarefas`: cria tarefa vinculada ao usuario
@@ -251,24 +251,21 @@ Authorization: Bearer <token>
 
 Abra o projeto com o Live Server/Go Live pela raiz. O arquivo `index.html` da raiz redireciona para:
 
-```
+
 http://127.0.0.1:5500/frontend/login.html
-```
+
 
 O fluxo de acesso e:
 
-```
+
 login.html ou registro.html
-        |
-        v
+                v
   Autenticacao via API
-        |
-        v
+                v
   Token salvo no localStorage
-        |
-        v
+                v
   index.html (dashboard)
-```
+
 
 O frontend consome a API em:
 
@@ -289,7 +286,7 @@ http://localhost:3000/api
 - Backend com CRUD de tarefas vinculado ao usuario autenticado
 - Conexao com MySQL via `mysql2`
 - Dashboard frontend com cards de resumo, filtros, busca, modal e detalhes da tarefa
-- Integracao do frontend com a API usando `fetch` autenticado
+- Integração do frontend com a API usando `fetch` autenticado
 
 ## Dependencias adicionadas
 
@@ -300,7 +297,7 @@ http://localhost:3000/api
 }
 ```
 
-## Observacoes de integracao
+## Observacoes de integração 
 
 - O backend normaliza prioridade e status, aceitando entradas com ou sem acento.
 - O frontend permite configurar a URL da API com `window.TASKWEB_API_URL` antes de carregar `app.js`.
