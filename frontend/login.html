@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TaskWeb — Login</title>
+  <link rel="stylesheet" href="auth.css" />
+</head>
+<body>
+  <div class="auth-card">
+    <h1 class="auth-logo">Task<span>Web</span></h1>
+    <p class="auth-subtitulo">Faça login para acessar suas tarefas</p>
+
+    <form id="formLogin" class="auth-form" novalidate>
+      <div class="campo">
+        <label for="email">E-mail</label>
+        <input type="email" id="email" placeholder="seu@email.com" autocomplete="email" required />
+      </div>
+
+      <div class="campo">
+        <label for="senha">Senha</label>
+        <input type="password" id="senha" placeholder="Sua senha" autocomplete="current-password" required />
+      </div>
+
+      <p id="msgErro" class="erro-msg" hidden></p>
+      <p id="msgSucesso" class="sucesso-msg" hidden></p>
+
+      <button type="submit" id="btnEntrar" class="btn-auth">Entrar</button>
+    </form>
+
+    <p class="auth-link">
+      Não tem conta? <a href="registro.html">Cadastre-se</a>
+    </p>
+  </div>
+
+  <script src="auth.js"></script>
+</body>
+</html>

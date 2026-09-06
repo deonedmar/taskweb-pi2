@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TaskWeb</title>
+    <link rel="stylesheet" href="./styles.css">
+  </head>
+  <body>
+    <div class="app">
+      <main class="main">
+        <header class="topbar">
+          <h1 id="saudacao">Olá! 👋</h1>
+          <strong class="brand">TaskWeb</strong>
+          <button class="btn secondary" id="btn-sair" type="button">Sair</button>
+        </header>
+
+        <section class="cards" aria-label="Resumo das tarefas">
+          <div class="card green">
+            <h3>✅ Concluídas</h3>
+            <p id="concluidas">0</p>
+          </div>
+
+          <div class="card yellow">
+            <h3>⏰ Em andamento</h3>
+            <p id="andamento">0</p>
+          </div>
+
+          <div class="card red">
+            <h3>❌ Atrasadas</h3>
+            <p id="atrasadas">0</p>
+          </div>
+        </section>
+
+        <div class="filtros-bar">
+          <div class="filtros" aria-label="Filtros de tarefas">
+            <button class="ativo" type="button" data-filtro="todas">Todas</button>
+            <button type="button" data-filtro="pendente">Pendentes</button>
+            <button type="button" data-filtro="concluida">Concluídas</button>
+            <button type="button" data-filtro="atrasada">Atrasadas</button>
+          </div>
+
+          <button class="btn" id="btn-nova-tarefa" type="button">+ Nova tarefa</button>
+        </div>
+
+        <section class="tarefas">
+          <div class="top-tarefas">
+            <h2>Minhas Tarefas</h2>
+            <div class="tarefas-controles">
+              <label for="ordenacao">Ordenar por</label>
+              <select id="ordenacao">
+                <option value="titulo">Tarefa</option>
+                <option value="prioridade">Prioridade</option>
+                <option value="criado_em">Data de criação</option>
+                <option value="prazo">Prazo</option>
+                <option value="status">Status</option>
+              </select>
+              <input type="search" id="busca" placeholder="Buscar...">
+            </div>
+          </div>
+
+          <table>
+            <thead>
+              <tr>
+                <th>Tarefa</th>
+                <th>Prioridade</th>
+                <th>Criada em</th>
+                <th>Prazo</th>
+                <th>Status</th>
+                <th>Detalhes</th>
+                <th>Ação</th>
+              </tr>
+            </thead>
+            <tbody id="lista-tarefas"></tbody>
+          </table>
+
+          <p class="mensagem" id="mensagem"></p>
+        </section>
+      </main>
+    </div>
+
+    <div id="modal" class="modal" aria-hidden="true">
+      <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="modal-titulo">
+        <h2 id="modal-titulo">Nova Tarefa</h2>
+
+        <form id="form-tarefa">
+          <input type="text" id="titulo" placeholder="Título da tarefa" required>
+          <textarea id="descricao" placeholder="Detalhes (opcional)" rows="4"></textarea>
+          <input type="date" id="prazo">
+
+          <select id="prioridade">
+            <option value="baixa">Baixa</option>
+            <option value="media">Média</option>
+            <option value="alta">Alta</option>
+          </select>
+
+          <div class="modal-actions">
+            <button class="btn" id="btn-salvar-tarefa" type="submit">Criar tarefa</button>
+            <button class="btn secondary" id="btn-cancelar" type="button">Cancelar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div id="modal-detalhes" class="modal" aria-hidden="true">
+      <div class="modal-content detalhes-content" role="dialog" aria-modal="true" aria-labelledby="detalhes-titulo">
+        <h2 id="detalhes-titulo">Detalhes da Tarefa</h2>
+        <p class="detalhes-meta" id="detalhes-meta"></p>
+        <p class="detalhes-texto" id="detalhes-texto"></p>
+        <button class="btn secondary" id="btn-fechar-detalhes" type="button">Fechar</button>
+      </div>
+    </div>
+
+    <script src="./app.js"></script>
+  </body>
+</html>

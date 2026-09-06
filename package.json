@@ -1,0 +1,35 @@
+{
+  "name": "taskweb-pji1",
+  "version": "1.0.0",
+  "description": "Sistema web para gerenciamento de tarefas desenvolvido no Projeto Integrador (PJI1 - UNIVESP)",
+  "main": "backend/src/server.js",
+  "scripts": {
+    "start": "node backend/src/server.js",
+    "dev": "nodemon backend/src/server.js",
+    "check": "node --check backend/src/server.js && node --check backend/src/controllers/tarefasController.js && node --check frontend/app.js",
+    "test": "npm run check"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/PJI1-26-G5/taskweb-pji1.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/PJI1-26-G5/taskweb-pji1/issues"
+  },
+  "homepage": "https://github.com/PJI1-26-G5/taskweb-pji1#readme",
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "jsonwebtoken": "^9.0.2",
+    "mysql2": "^3.11.3"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.4"
+  }
+}
