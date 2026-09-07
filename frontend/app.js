@@ -32,8 +32,7 @@ function fetchAuth(url, options = {}) {
 // Configuração da API (inalterada)
 // ============================================================
 const API_BASE_URL = window.TASKWEB_API_URL || 'http://localhost:3000/api';
-const API_URL = `${API_BASE_URL}/tarefas`;
-
+const API_URL = `${API_BASE_URL}/api/tarefas`;
 // ============================================================
 // Elementos do DOM (inalterados)
 // ============================================================
