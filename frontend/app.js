@@ -39,6 +39,7 @@ const API_URL = `${API_BASE_URL}/api/tarefas`;
 const modal = document.getElementById('modal');
 const form = document.getElementById('form-tarefa');
 const lista = document.getElementById('lista-tarefas');
+const listaCards = document.getElementById('lista-tarefas-cards');
 const mensagem = document.getElementById('mensagem');
 const busca = document.getElementById('busca');
 const ordenacao = document.getElementById('ordenacao');
@@ -162,15 +163,19 @@ function criarCelula(texto) {
   return td;
 }
 
-function criarCelulaDetalhes(tarefa) {
-  const td = document.createElement('td');
+function criarBotaoDetalhes(tarefa) {
   const botao = document.createElement('button');
   botao.className = 'detalhes-btn';
   botao.type = 'button';
   botao.textContent = 'ℹ';
   botao.title = 'Ver detalhes da tarefa';
   botao.addEventListener('click', () => abrirDetalhes(tarefa));
-  td.appendChild(botao);
+  return botao;
+}
+
+function criarCelulaDetalhes(tarefa) {
+  const td = document.createElement('td');
+  td.appendChild(criarBotaoDetalhes(tarefa));
   return td;
 }
 
@@ -247,8 +252,72 @@ function filtrarTarefas() {
   });
 }
 
+function criarBotoesAcao(tarefa) {
+  const botoes = document.createElement('div');
+  botoes.className = 'acao';
+
+  const concluir = document.createElement('button');
+  const tarefaConcluida = tarefa.status === 'concluida';
+  concluir.className = tarefaConcluida ? 'desmarcar' : 'concluir';
+  concluir.type = 'button';
+  concluir.textContent = tarefaConcluida ? '↩' : '✓';
+  concluir.title = tarefaConcluida ? 'Desmarcar conclusão' : 'Marcar como concluída';
+  concluir.addEventListener('click', () => alternarConclusao(tarefa));
+
+  const editar = document.createElement('button');
+  editar.className = 'editar';
+  editar.type = 'button';
+  editar.textContent = '✎';
+  editar.title = 'Editar tarefa';
+  editar.addEventListener('click', () => abrirModal(tarefa));
+
+  const excluir = document.createElement('button');
+  excluir.className = 'excluir';
+  excluir.type = 'button';
+  excluir.textContent = '🗑';
+  excluir.title = 'Excluir tarefa';
+  excluir.addEventListener('click', () => excluirTarefa(tarefa));
+
+  botoes.append(concluir, editar, excluir);
+  return botoes;
+}
+
+function criarCardTarefa(tarefa) {
+  const card = document.createElement('div');
+  card.className = 'tarefa-card';
+
+  const topo = document.createElement('div');
+  topo.className = 'tarefa-card-topo';
+  const titulo = document.createElement('h3');
+  titulo.textContent = tarefa.titulo;
+  topo.append(titulo, criarBotaoDetalhes(tarefa));
+
+  const badges = document.createElement('div');
+  badges.className = 'tarefa-card-badges';
+  badges.append(
+    criarBadge(traduzirPrioridade(tarefa.prioridade), tarefa.prioridade, 'prioridade'),
+    criarBadge(traduzirStatus(tarefa.status), tarefa.status, 'badge')
+  );
+
+  const datas = document.createElement('div');
+  datas.className = 'tarefa-card-datas';
+  const criadaEm = document.createElement('span');
+  criadaEm.textContent = `Criada em: ${formatarData(tarefa.criado_em)}`;
+  const prazo = document.createElement('span');
+  prazo.textContent = `Prazo: ${formatarData(tarefa.prazo)}`;
+  datas.append(criadaEm, prazo);
+
+  const acoes = document.createElement('div');
+  acoes.className = 'tarefa-card-acoes';
+  acoes.appendChild(criarBotoesAcao(tarefa));
+
+  card.append(topo, badges, datas, acoes);
+  return card;
+}
+
 function renderizar() {
   lista.innerHTML = '';
+  listaCards.innerHTML = '';
   mensagem.textContent = '';
   atualizarResumo();
 
@@ -268,33 +337,7 @@ function renderizar() {
     status.appendChild(criarBadge(traduzirStatus(tarefa.status), tarefa.status, 'badge'));
 
     const acao = document.createElement('td');
-    const botoes = document.createElement('div');
-    botoes.className = 'acao';
-
-    const concluir = document.createElement('button');
-    const tarefaConcluida = tarefa.status === 'concluida';
-    concluir.className = tarefaConcluida ? 'desmarcar' : 'concluir';
-    concluir.type = 'button';
-    concluir.textContent = tarefaConcluida ? '↩' : '✓';
-    concluir.title = tarefaConcluida ? 'Desmarcar conclusão' : 'Marcar como concluída';
-    concluir.addEventListener('click', () => alternarConclusao(tarefa));
-
-    const editar = document.createElement('button');
-    editar.className = 'editar';
-    editar.type = 'button';
-    editar.textContent = '✎';
-    editar.title = 'Editar tarefa';
-    editar.addEventListener('click', () => abrirModal(tarefa));
-
-    const excluir = document.createElement('button');
-    excluir.className = 'excluir';
-    excluir.type = 'button';
-    excluir.textContent = '🗑';
-    excluir.title = 'Excluir tarefa';
-    excluir.addEventListener('click', () => excluirTarefa(tarefa));
-
-    botoes.append(concluir, editar, excluir);
-    acao.appendChild(botoes);
+    acao.appendChild(criarBotoesAcao(tarefa));
 
     tr.append(
       criarCelula(tarefa.titulo),
@@ -307,6 +350,7 @@ function renderizar() {
     );
 
     lista.appendChild(tr);
+    listaCards.appendChild(criarCardTarefa(tarefa));
   });
 }
 
