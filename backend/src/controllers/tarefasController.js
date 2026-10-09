@@ -42,14 +42,25 @@ function validarPrazo(prazo) {
   return null;
 }
 
+// "Hoje" sempre no fuso de São Paulo (o servidor e o banco rodam em UTC,
+// que já vira o dia seguinte a partir das 21h no Brasil).
+function hojeEmSaoPaulo() {
+  return new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Sao_Paulo' }).format(new Date());
+}
+
+function formatarDataISO(prazo) {
+  if (prazo instanceof Date) {
+    const ano = prazo.getFullYear();
+    const mes = String(prazo.getMonth() + 1).padStart(2, '0');
+    const dia = String(prazo.getDate()).padStart(2, '0');
+    return `${ano}-${mes}-${dia}`;
+  }
+  return String(prazo).slice(0, 10);
+}
+
 function prazoEstaAtrasado(prazo) {
   if (!prazo) return false;
-  const hoje = new Date();
-  hoje.setHours(0, 0, 0, 0);
-  const dataPrazo = prazo instanceof Date
-    ? new Date(prazo.getFullYear(), prazo.getMonth(), prazo.getDate())
-    : new Date(`${prazo}T00:00:00`);
-  return dataPrazo < hoje;
+  return formatarDataISO(prazo) < hojeEmSaoPaulo();
 }
 
 function aplicarStatusPorPrazo(status, prazo) {
@@ -66,14 +77,25 @@ function parseId(id) {
 }
 
 async function atualizarTarefasAtrasadas(usuarioId) {
+  const hoje = hojeEmSaoPaulo();
+
   await pool.query(`
     UPDATE tarefas
     SET status = 'atrasada'
     WHERE status <> 'concluida'
       AND prazo IS NOT NULL
-      AND prazo < CURDATE()
+      AND prazo < ?
       AND usuario_id = ?
-  `, [usuarioId]);
+  `, [hoje, usuarioId]);
+
+  // Desfaz marcações indevidas (ex.: prazo é hoje, mas estava como atrasada)
+  await pool.query(`
+    UPDATE tarefas
+    SET status = 'pendente'
+    WHERE status = 'atrasada'
+      AND (prazo IS NULL OR prazo >= ?)
+      AND usuario_id = ?
+  `, [hoje, usuarioId]);
 }
 
 async function listarTarefas(req, res) {
