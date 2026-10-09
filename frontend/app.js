@@ -52,6 +52,50 @@ const detalhesTexto = document.getElementById('detalhes-texto');
 const btnSalvarTarefa = document.getElementById('btn-salvar-tarefa');
 
 // ============================================================
+// Toasts e confirmação (substituem alert()/confirm())
+// ============================================================
+const toastContainer = document.getElementById('toast-container');
+
+function mostrarToast(mensagemTexto, tipo = 'info') {
+  const toast = document.createElement('div');
+  toast.className = `toast ${tipo}`;
+  toast.textContent = mensagemTexto;
+  toastContainer.appendChild(toast);
+
+  setTimeout(() => {
+    toast.classList.add('saindo');
+    toast.addEventListener('animationend', () => toast.remove(), { once: true });
+  }, 3000);
+}
+
+const modalConfirmar = document.getElementById('modal-confirmar');
+const confirmarTexto = document.getElementById('confirmar-texto');
+const btnConfirmarSim = document.getElementById('btn-confirmar-sim');
+const btnConfirmarNao = document.getElementById('btn-confirmar-nao');
+
+function confirmarAcao(mensagemTexto) {
+  return new Promise((resolve) => {
+    confirmarTexto.textContent = mensagemTexto;
+    modalConfirmar.classList.add('show');
+    modalConfirmar.setAttribute('aria-hidden', 'false');
+
+    function limpar(resultado) {
+      modalConfirmar.classList.remove('show');
+      modalConfirmar.setAttribute('aria-hidden', 'true');
+      btnConfirmarSim.removeEventListener('click', onSim);
+      btnConfirmarNao.removeEventListener('click', onNao);
+      resolve(resultado);
+    }
+
+    function onSim() { limpar(true); }
+    function onNao() { limpar(false); }
+
+    btnConfirmarSim.addEventListener('click', onSim);
+    btnConfirmarNao.addEventListener('click', onNao);
+  });
+}
+
+// ============================================================
 // Exibe o nome do usuário logado
 // ============================================================
 const saudacao = document.getElementById('saudacao');
@@ -126,7 +170,7 @@ function fecharModal() {
 
 function abrirDetalhes(tarefa) {
   detalhesTitulo.textContent = tarefa.titulo;
-  detalhesMeta.textContent = `Criada em: ${formatarData(tarefa.criado_em)} | Prioridade: ${traduzirPrioridade(tarefa.prioridade)} | Prazo: ${formatarData(tarefa.prazo)} | Status: ${traduzirStatus(tarefa.status)}`;
+  detalhesMeta.textContent = `Criada em: ${formatarData(tarefa.criado_em, 'America/Sao_Paulo')} | Prioridade: ${traduzirPrioridade(tarefa.prioridade)} | Prazo: ${formatarData(tarefa.prazo)} | Status: ${traduzirStatus(tarefa.status)}`;
   detalhesTexto.textContent = tarefa.descricao || 'Esta tarefa não possui descrição.';
   modalDetalhes.classList.add('show');
   modalDetalhes.setAttribute('aria-hidden', 'false');
@@ -147,9 +191,9 @@ function traduzirStatus(status) {
   return nomes[status] || status;
 }
 
-function formatarData(data) {
+function formatarData(data, fuso = 'UTC') {
   if (!data) return '-';
-  return new Date(data).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
+  return new Date(data).toLocaleDateString('pt-BR', { timeZone: fuso });
 }
 
 function formatarDataParaInput(data) {
@@ -285,6 +329,7 @@ function criarBotoesAcao(tarefa) {
 function criarCardTarefa(tarefa) {
   const card = document.createElement('div');
   card.className = 'tarefa-card';
+  card.dataset.id = tarefa.id;
 
   const topo = document.createElement('div');
   topo.className = 'tarefa-card-topo';
@@ -302,7 +347,7 @@ function criarCardTarefa(tarefa) {
   const datas = document.createElement('div');
   datas.className = 'tarefa-card-datas';
   const criadaEm = document.createElement('span');
-  criadaEm.textContent = `Criada em: ${formatarData(tarefa.criado_em)}`;
+  criadaEm.textContent = `Criada em: ${formatarData(tarefa.criado_em, 'America/Sao_Paulo')}`;
   const prazo = document.createElement('span');
   prazo.textContent = `Prazo: ${formatarData(tarefa.prazo)}`;
   datas.append(criadaEm, prazo);
@@ -327,8 +372,11 @@ function renderizar() {
     return;
   }
 
-  tarefasFiltradas.forEach((tarefa) => {
+  tarefasFiltradas.forEach((tarefa, indice) => {
     const tr = document.createElement('tr');
+    tr.dataset.id = tarefa.id;
+    tr.classList.add('entrando');
+    tr.style.animationDelay = `${indice * 30}ms`;
 
     const prioridade = document.createElement('td');
     prioridade.appendChild(criarBadge(traduzirPrioridade(tarefa.prioridade), tarefa.prioridade, 'prioridade'));
@@ -342,7 +390,7 @@ function renderizar() {
     tr.append(
       criarCelula(tarefa.titulo),
       prioridade,
-      criarCelula(formatarData(tarefa.criado_em)),
+      criarCelula(formatarData(tarefa.criado_em, 'America/Sao_Paulo')),
       criarCelula(formatarData(tarefa.prazo)),
       status,
       criarCelulaDetalhes(tarefa),
@@ -350,7 +398,11 @@ function renderizar() {
     );
 
     lista.appendChild(tr);
-    listaCards.appendChild(criarCardTarefa(tarefa));
+
+    const card = criarCardTarefa(tarefa);
+    card.classList.add('entrando');
+    card.style.animationDelay = `${indice * 30}ms`;
+    listaCards.appendChild(card);
   });
 }
 
@@ -372,6 +424,7 @@ async function salvarTarefa(event) {
   event.preventDefault();
 
   const tarefaAtual = tarefas.find((t) => t.id === tarefaEmEdicaoId);
+  const estaEditando = Boolean(tarefaEmEdicaoId);
   const payload = {
     titulo:    document.getElementById('titulo').value,
     descricao: document.getElementById('descricao').value,
@@ -385,12 +438,13 @@ async function salvarTarefa(event) {
 
   const response = await fetchAuth(url, { method: metodo, body: JSON.stringify(payload) });
   if (!response || !response.ok) {
-    const erro = await response.json();
-    alert(erro.erro || 'Não foi possível cadastrar a tarefa.');
+    const erro = await response.json().catch(() => ({}));
+    mostrarToast(erro.erro || 'Não foi possível cadastrar a tarefa.', 'erro');
     return;
   }
 
   fecharModal();
+  mostrarToast(estaEditando ? 'Tarefa atualizada.' : 'Tarefa criada.', 'sucesso');
   await carregarTarefas();
 }
 
@@ -400,18 +454,29 @@ async function alternarConclusao(tarefa) {
     method: 'PUT',
     body: JSON.stringify({ status: novoStatus })
   });
-  if (!response || !response.ok) { alert('Não foi possível atualizar o status.'); return; }
+  if (!response || !response.ok) { mostrarToast('Não foi possível atualizar o status.', 'erro'); return; }
+  mostrarToast(novoStatus === 'concluida' ? 'Tarefa concluída!' : 'Tarefa reaberta.', 'sucesso');
   await carregarTarefas();
 }
 
 async function excluirTarefa(tarefa) {
-  const confirmouExclusao = window.confirm(
-    `Deseja realmente excluir a tarefa "${tarefa.titulo}"?\n\nEssa ação não poderá ser desfeita.`
+  const confirmou = await confirmarAcao(
+    `Deseja realmente excluir a tarefa "${tarefa.titulo}"? Essa ação não poderá ser desfeita.`
   );
-  if (!confirmouExclusao) return;
+  if (!confirmou) return;
+
+  const elementos = document.querySelectorAll(`[data-id="${tarefa.id}"]`);
+  elementos.forEach((el) => el.classList.add('saindo'));
+  await new Promise((resolve) => setTimeout(resolve, 200));
 
   const response = await fetchAuth(`${API_URL}/${tarefa.id}`, { method: 'DELETE' });
-  if (!response || !response.ok) { alert('Não foi possível excluir a tarefa.'); return; }
+  if (!response || !response.ok) {
+    elementos.forEach((el) => el.classList.remove('saindo'));
+    mostrarToast('Não foi possível excluir a tarefa.', 'erro');
+    return;
+  }
+
+  mostrarToast('Tarefa excluída.', 'sucesso');
   await carregarTarefas();
 }
 
@@ -421,7 +486,19 @@ async function excluirTarefa(tarefa) {
 document.getElementById('btn-nova-tarefa').addEventListener('click', () => abrirModal());
 document.getElementById('btn-cancelar').addEventListener('click', fecharModal);
 document.getElementById('btn-fechar-detalhes').addEventListener('click', fecharDetalhes);
-form.addEventListener('submit', salvarTarefa);
+let salvandoTarefa = false;
+
+form.addEventListener('submit', async (event) => {
+  if (salvandoTarefa) { event.preventDefault(); return; }
+  salvandoTarefa = true;
+  btnSalvarTarefa.disabled = true;
+  try {
+    await salvarTarefa(event);
+  } finally {
+    salvandoTarefa = false;
+    btnSalvarTarefa.disabled = false;
+  }
+});
 busca.addEventListener('input', renderizar);
 ordenacao.addEventListener('change', () => { ordenacaoAtual = ordenacao.value; renderizar(); });
 
