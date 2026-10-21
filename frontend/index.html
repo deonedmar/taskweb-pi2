@@ -7,37 +7,40 @@
     <link rel="stylesheet" href="./styles.css">
   </head>
   <body>
+    <a class="skip-link" href="#conteudo-principal">Pular para o conteúdo principal</a>
+
     <div class="app">
-      <main class="main">
+      <main class="main" id="conteudo-principal" tabindex="-1">
         <header class="topbar">
-          <h1 id="saudacao">Olá! 👋</h1>
+          <h1 id="saudacao">Olá! <span aria-hidden="true">👋</span></h1>
           <strong class="brand">TaskWeb</strong>
           <button class="btn secondary" id="btn-sair" type="button">Sair</button>
         </header>
 
-        <section class="cards" aria-label="Resumo das tarefas">
+        <section class="cards" aria-labelledby="titulo-resumo">
+          <h2 id="titulo-resumo" class="sr-only">Resumo das tarefas</h2>
           <div class="card green">
-            <h3>✅ Concluídas</h3>
+            <h3><span aria-hidden="true">✅</span> Concluídas</h3>
             <p id="concluidas">0</p>
           </div>
 
           <div class="card yellow">
-            <h3>⏰ Em andamento</h3>
+            <h3><span aria-hidden="true">⏰</span> Em andamento</h3>
             <p id="andamento">0</p>
           </div>
 
           <div class="card red">
-            <h3>❌ Atrasadas</h3>
+            <h3><span aria-hidden="true">❌</span> Atrasadas</h3>
             <p id="atrasadas">0</p>
           </div>
         </section>
 
         <div class="filtros-bar">
-          <div class="filtros" aria-label="Filtros de tarefas">
-            <button class="ativo" type="button" data-filtro="todas">Todas</button>
-            <button type="button" data-filtro="pendente">Pendentes</button>
-            <button type="button" data-filtro="concluida">Concluídas</button>
-            <button type="button" data-filtro="atrasada">Atrasadas</button>
+          <div class="filtros" role="group" aria-label="Filtrar tarefas por status">
+            <button class="ativo" type="button" data-filtro="todas" aria-pressed="true">Todas</button>
+            <button type="button" data-filtro="pendente" aria-pressed="false">Pendentes</button>
+            <button type="button" data-filtro="concluida" aria-pressed="false">Concluídas</button>
+            <button type="button" data-filtro="atrasada" aria-pressed="false">Atrasadas</button>
           </div>
 
           <button class="btn" id="btn-nova-tarefa" type="button">+ Nova tarefa</button>
@@ -45,7 +48,7 @@
 
         <section class="tarefas">
           <div class="top-tarefas">
-            <h2>Minhas Tarefas</h2>
+            <h2 id="titulo-tarefas" tabindex="-1">Minhas Tarefas</h2>
             <div class="tarefas-controles">
               <label for="ordenacao">Ordenar por</label>
               <select id="ordenacao">
@@ -55,29 +58,31 @@
                 <option value="prazo">Prazo</option>
                 <option value="status">Status</option>
               </select>
+              <label for="busca" class="sr-only">Buscar tarefas pelo título</label>
               <input type="search" id="busca" placeholder="Buscar...">
             </div>
           </div>
 
           <table>
+            <caption class="sr-only">Lista de tarefas</caption>
             <thead>
               <tr>
-                <th>Tarefa</th>
-                <th>Prioridade</th>
-                <th>Criada em</th>
-                <th>Prazo</th>
-                <th>Status</th>
-                <th>Detalhes</th>
-                <th>Ação</th>
+                <th scope="col">Tarefa</th>
+                <th scope="col">Prioridade</th>
+                <th scope="col">Criada em</th>
+                <th scope="col">Prazo</th>
+                <th scope="col">Status</th>
+                <th scope="col">Detalhes</th>
+                <th scope="col">Ação</th>
               </tr>
             </thead>
-                        <tbody id="lista-tarefas"></tbody>
+            <tbody id="lista-tarefas"></tbody>
           </table>
 
           <div class="tarefas-cards" id="lista-tarefas-cards"></div>
 
-          
-          <p class="mensagem" id="mensagem"></p>
+          <p class="mensagem" id="mensagem" role="status"></p>
+          <p class="sr-only" id="anuncio-lista" role="status" aria-live="polite" aria-atomic="true"></p>
         </section>
       </main>
     </div>
@@ -87,10 +92,14 @@
         <h2 id="modal-titulo">Nova Tarefa</h2>
 
         <form id="form-tarefa">
-          <input type="text" id="titulo" placeholder="Título da tarefa" required>
+          <label for="titulo" class="sr-only">Título da tarefa (obrigatório)</label>
+          <input type="text" id="titulo" placeholder="Título da tarefa" required aria-required="true">
+          <label for="descricao" class="sr-only">Detalhes da tarefa (opcional)</label>
           <textarea id="descricao" placeholder="Detalhes (opcional)" rows="4"></textarea>
+          <label for="prazo" class="sr-only">Prazo da tarefa</label>
           <input type="date" id="prazo">
 
+          <label for="prioridade" class="sr-only">Prioridade da tarefa</label>
           <select id="prioridade">
             <option value="baixa">Baixa</option>
             <option value="media">Média</option>
@@ -106,8 +115,8 @@
     </div>
 
     <div id="modal-detalhes" class="modal" aria-hidden="true">
-      <div class="modal-content detalhes-content" role="dialog" aria-modal="true" aria-labelledby="detalhes-titulo">
-        <h2 id="detalhes-titulo">Detalhes da Tarefa</h2>
+      <div class="modal-content detalhes-content" role="dialog" aria-modal="true" aria-labelledby="detalhes-titulo" aria-describedby="detalhes-meta detalhes-texto">
+        <h2 id="detalhes-titulo" tabindex="-1">Detalhes da Tarefa</h2>
         <p class="detalhes-meta" id="detalhes-meta"></p>
         <p class="detalhes-texto" id="detalhes-texto"></p>
         <button class="btn secondary" id="btn-fechar-detalhes" type="button">Fechar</button>
@@ -115,7 +124,7 @@
     </div>
 
     <div id="modal-confirmar" class="modal" aria-hidden="true">
-      <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="confirmar-titulo">
+      <div class="modal-content" role="alertdialog" aria-modal="true" aria-labelledby="confirmar-titulo" aria-describedby="confirmar-texto">
         <h2 id="confirmar-titulo">Confirmar ação</h2>
         <p id="confirmar-texto" style="margin: 12px 0 20px; color: #444;"></p>
         <div class="modal-actions">
@@ -125,7 +134,7 @@
       </div>
     </div>
 
-    <div id="toast-container" class="toast-container"></div>
+    <div id="toast-container" class="toast-container" role="status" aria-live="polite"></div>
 
     <script src="./config.js"></script>
     <script src="./app.js"></script>

@@ -14,8 +14,11 @@ if (localStorage.getItem('taskweb_token')) {
 function mostrarErro(id, msg) {
   const el = document.getElementById(id);
   if (!el) return;
-  el.textContent = msg;
+  el.textContent = '';
   el.hidden = false;
+  // Pequeno atraso: o leitor de tela anuncia melhor o texto inserido
+  // depois que o aviso já apareceu na página.
+  setTimeout(() => { el.textContent = msg; }, 50);
 }
 
 function ocultarMensagens() {

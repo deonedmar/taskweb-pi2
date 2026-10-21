@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="auth.css" />
 </head>
 <body>
-  <div class="auth-card">
+  <main class="auth-card">
     <h1 class="auth-logo">Task<span>Web</span></h1>
     <p class="auth-subtitulo">Crie sua conta gratuitamente</p>
 
@@ -32,7 +32,7 @@
         <input type="password" id="confirmarSenha" placeholder="Repita a senha" autocomplete="new-password" required />
       </div>
 
-      <p id="msgErro" class="erro-msg" hidden></p>
+      <p id="msgErro" class="erro-msg" role="alert" hidden></p>
 
       <button type="submit" id="btnCadastrar" class="btn-auth">Criar conta</button>
     </form>
@@ -40,7 +40,7 @@
     <p class="auth-link">
       Já tem conta? <a href="login.html">Entrar</a>
     </p>
-  </div>
+  </main>
 
   <script src="config.js"></script>
   <script src="auth.js"></script>

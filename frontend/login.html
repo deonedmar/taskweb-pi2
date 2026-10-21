@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="auth.css" />
 </head>
 <body>
-  <div class="auth-card">
+  <main class="auth-card">
     <h1 class="auth-logo">Task<span>Web</span></h1>
     <p class="auth-subtitulo">Faça login para acessar suas tarefas</p>
 
@@ -22,8 +22,8 @@
         <input type="password" id="senha" placeholder="Sua senha" autocomplete="current-password" required />
       </div>
 
-      <p id="msgErro" class="erro-msg" hidden></p>
-      <p id="msgSucesso" class="sucesso-msg" hidden></p>
+      <p id="msgErro" class="erro-msg" role="alert" hidden></p>
+      <p id="msgSucesso" class="sucesso-msg" role="status" hidden></p>
 
       <button type="submit" id="btnEntrar" class="btn-auth">Entrar</button>
     </form>
@@ -33,9 +33,9 @@
     </p>
 
     <p class="auth-link">
-      <a href="https://docs.google.com/forms/d/e/1FAIpQLSeHVjPPt8JoJHvgYPrtcIvSxyWY37rTFQCTPbDRhxuzeP9nlQ/viewform?usp=publish-editor" target="_blank" rel="noopener">Deixe sua avaliação sobre o TaskWeb</a>
+      <a href="https://docs.google.com/forms/d/e/1FAIpQLSeHVjPPt8JoJHvgYPrtcIvSxyWY37rTFQCTPbDRhxuzeP9nlQ/viewform?usp=publish-editor" target="_blank" rel="noopener">Deixe sua avaliação sobre o TaskWeb<span class="sr-only"> (abre em nova aba)</span></a>
     </p>
-  </div>
+  </main>
 
   <script src="config.js"></script>
   <script src="auth.js"></script>

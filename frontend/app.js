@@ -59,13 +59,14 @@ const toastContainer = document.getElementById('toast-container');
 function mostrarToast(mensagemTexto, tipo = 'info') {
   const toast = document.createElement('div');
   toast.className = `toast ${tipo}`;
+  if (tipo === 'erro') toast.setAttribute('role', 'alert');
   toast.textContent = mensagemTexto;
   toastContainer.appendChild(toast);
 
   setTimeout(() => {
     toast.classList.add('saindo');
     toast.addEventListener('animationend', () => toast.remove(), { once: true });
-  }, 3000);
+  }, tipo === 'erro' ? 6000 : 3000);
 }
 
 const modalConfirmar = document.getElementById('modal-confirmar');
@@ -76,12 +77,9 @@ const btnConfirmarNao = document.getElementById('btn-confirmar-nao');
 function confirmarAcao(mensagemTexto) {
   return new Promise((resolve) => {
     confirmarTexto.textContent = mensagemTexto;
-    modalConfirmar.classList.add('show');
-    modalConfirmar.setAttribute('aria-hidden', 'false');
 
     function limpar(resultado) {
-      modalConfirmar.classList.remove('show');
-      modalConfirmar.setAttribute('aria-hidden', 'true');
+      fecharModalAcessivel(modalConfirmar);
       btnConfirmarSim.removeEventListener('click', onSim);
       btnConfirmarNao.removeEventListener('click', onNao);
       resolve(resultado);
@@ -92,7 +90,77 @@ function confirmarAcao(mensagemTexto) {
 
     btnConfirmarSim.addEventListener('click', onSim);
     btnConfirmarNao.addEventListener('click', onNao);
+
+    // Foco inicial em "Cancelar" (ação segura); Esc também cancela
+    abrirModalAcessivel(modalConfirmar, btnConfirmarNao, onNao);
   });
+}
+
+// ============================================================
+// Acessibilidade: foco, teclado e conteúdo de fundo dos modais
+// ============================================================
+const appRaiz = document.querySelector('.app');
+const tituloTarefas = document.getElementById('titulo-tarefas');
+const anuncioLista = document.getElementById('anuncio-lista');
+const pilhaModais = [];
+const SELETOR_FOCAVEL =
+  'a[href], button:not([disabled]), input:not([disabled]):not([type="hidden"]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
+function abrirModalAcessivel(modalEl, focoInicial, aoFechar) {
+  pilhaModais.push({ modalEl, gatilho: document.activeElement, aoFechar });
+  modalEl.classList.add('show');
+  modalEl.setAttribute('aria-hidden', 'false');
+  if (appRaiz) appRaiz.setAttribute('inert', ''); // leitor de tela não "enxerga" o fundo
+  if (focoInicial) focoInicial.focus();
+}
+
+function fecharModalAcessivel(modalEl) {
+  modalEl.classList.remove('show');
+  modalEl.setAttribute('aria-hidden', 'true');
+
+  const indice = pilhaModais.findIndex((m) => m.modalEl === modalEl);
+  const registro = indice >= 0 ? pilhaModais.splice(indice, 1)[0] : null;
+  if (pilhaModais.length === 0 && appRaiz) appRaiz.removeAttribute('inert');
+
+  const gatilho = registro && registro.gatilho;
+  const alvo = gatilho && gatilho !== document.body && document.contains(gatilho) ? gatilho : tituloTarefas;
+  if (alvo && typeof alvo.focus === 'function') alvo.focus();
+}
+
+document.addEventListener('keydown', (event) => {
+  const topo = pilhaModais[pilhaModais.length - 1];
+  if (!topo) return;
+
+  if (event.key === 'Escape') {
+    event.preventDefault();
+    topo.aoFechar();
+    return;
+  }
+
+  if (event.key === 'Tab') {
+    const focaveis = [...topo.modalEl.querySelectorAll(SELETOR_FOCAVEL)];
+    if (focaveis.length === 0) return;
+    const primeiro = focaveis[0];
+    const ultimo = focaveis[focaveis.length - 1];
+    const ativo = document.activeElement;
+    const dentro = topo.modalEl.contains(ativo);
+
+    if (event.shiftKey && (ativo === primeiro || !dentro)) {
+      event.preventDefault();
+      ultimo.focus();
+    } else if (!event.shiftKey && (ativo === ultimo || !dentro)) {
+      event.preventDefault();
+      primeiro.focus();
+    }
+  }
+});
+
+function focarBotaoDaTarefa(id, seletor) {
+  // aplica o escopo da tarefa a cada item de uma lista separada por vírgula
+  const escopo = seletor.split(',').map((parte) => `[data-id="${id}"] ${parte.trim()}`).join(', ');
+  const candidatos = [...document.querySelectorAll(escopo)];
+  const alvo = candidatos.find((el) => el.offsetParent !== null) || candidatos[0];
+  if (alvo) alvo.focus();
 }
 
 // ============================================================
@@ -101,7 +169,11 @@ function confirmarAcao(mensagemTexto) {
 const saudacao = document.getElementById('saudacao');
 if (saudacao && NOME_USUARIO) {
   const primeiroNome = NOME_USUARIO.trim().split(' ')[0];
-  saudacao.textContent = `Olá, ${primeiroNome} 👋`;
+  saudacao.textContent = `Olá, ${primeiroNome} `;
+  const emojiSaudacao = document.createElement('span');
+  emojiSaudacao.setAttribute('aria-hidden', 'true');
+  emojiSaudacao.textContent = '👋';
+  saudacao.appendChild(emojiSaudacao);
 }
 
 // ============================================================
@@ -154,14 +226,11 @@ function abrirModal(tarefa = null) {
     preencherFormularioNovaTarefa();
   }
 
-  modal.classList.add('show');
-  modal.setAttribute('aria-hidden', 'false');
-  document.getElementById('titulo').focus();
+  abrirModalAcessivel(modal, document.getElementById('titulo'), fecharModal);
 }
 
 function fecharModal() {
-  modal.classList.remove('show');
-  modal.setAttribute('aria-hidden', 'true');
+  fecharModalAcessivel(modal);
   tarefaEmEdicaoId = null;
   modalTitulo.textContent = 'Nova Tarefa';
   btnSalvarTarefa.textContent = 'Criar tarefa';
@@ -172,13 +241,11 @@ function abrirDetalhes(tarefa) {
   detalhesTitulo.textContent = tarefa.titulo;
   detalhesMeta.textContent = `Criada em: ${formatarData(tarefa.criado_em, 'America/Sao_Paulo')} | Prioridade: ${traduzirPrioridade(tarefa.prioridade)} | Prazo: ${formatarData(tarefa.prazo)} | Status: ${traduzirStatus(tarefa.status)}`;
   detalhesTexto.textContent = tarefa.descricao || 'Esta tarefa não possui descrição.';
-  modalDetalhes.classList.add('show');
-  modalDetalhes.setAttribute('aria-hidden', 'false');
+  abrirModalAcessivel(modalDetalhes, detalhesTitulo, fecharDetalhes);
 }
 
 function fecharDetalhes() {
-  modalDetalhes.classList.remove('show');
-  modalDetalhes.setAttribute('aria-hidden', 'true');
+  fecharModalAcessivel(modalDetalhes);
 }
 
 function traduzirPrioridade(prioridade) {
@@ -213,6 +280,7 @@ function criarBotaoDetalhes(tarefa) {
   botao.type = 'button';
   botao.textContent = 'ℹ';
   botao.title = 'Ver detalhes da tarefa';
+  botao.setAttribute('aria-label', `Ver detalhes da tarefa: ${tarefa.titulo}`);
   botao.addEventListener('click', () => abrirDetalhes(tarefa));
   return botao;
 }
@@ -223,10 +291,17 @@ function criarCelulaDetalhes(tarefa) {
   return td;
 }
 
-function criarBadge(texto, classe, tipo) {
+function criarBadge(texto, classe, tipo, rotulo) {
   const span = document.createElement('span');
   span.className = `${tipo} ${classe}`;
-  span.textContent = texto;
+  if (rotulo) {
+    const oculto = document.createElement('span');
+    oculto.className = 'sr-only';
+    oculto.textContent = `${rotulo}: `;
+    span.append(oculto, texto);
+  } else {
+    span.textContent = texto;
+  }
   return span;
 }
 
@@ -306,6 +381,7 @@ function criarBotoesAcao(tarefa) {
   concluir.type = 'button';
   concluir.textContent = tarefaConcluida ? '↩' : '✓';
   concluir.title = tarefaConcluida ? 'Desmarcar conclusão' : 'Marcar como concluída';
+  concluir.setAttribute('aria-label', `${tarefaConcluida ? 'Reabrir tarefa' : 'Marcar como concluída'}: ${tarefa.titulo}`);
   concluir.addEventListener('click', () => alternarConclusao(tarefa));
 
   const editar = document.createElement('button');
@@ -313,6 +389,7 @@ function criarBotoesAcao(tarefa) {
   editar.type = 'button';
   editar.textContent = '✎';
   editar.title = 'Editar tarefa';
+  editar.setAttribute('aria-label', `Editar tarefa: ${tarefa.titulo}`);
   editar.addEventListener('click', () => abrirModal(tarefa));
 
   const excluir = document.createElement('button');
@@ -320,6 +397,7 @@ function criarBotoesAcao(tarefa) {
   excluir.type = 'button';
   excluir.textContent = '🗑';
   excluir.title = 'Excluir tarefa';
+  excluir.setAttribute('aria-label', `Excluir tarefa: ${tarefa.titulo}`);
   excluir.addEventListener('click', () => excluirTarefa(tarefa));
 
   botoes.append(concluir, editar, excluir);
@@ -327,21 +405,23 @@ function criarBotoesAcao(tarefa) {
 }
 
 function criarCardTarefa(tarefa) {
-  const card = document.createElement('div');
+  const card = document.createElement('article');
   card.className = 'tarefa-card';
   card.dataset.id = tarefa.id;
 
   const topo = document.createElement('div');
   topo.className = 'tarefa-card-topo';
   const titulo = document.createElement('h3');
+  titulo.id = `card-titulo-${tarefa.id}`;
   titulo.textContent = tarefa.titulo;
+  card.setAttribute('aria-labelledby', titulo.id);
   topo.append(titulo, criarBotaoDetalhes(tarefa));
 
   const badges = document.createElement('div');
   badges.className = 'tarefa-card-badges';
   badges.append(
-    criarBadge(traduzirPrioridade(tarefa.prioridade), tarefa.prioridade, 'prioridade'),
-    criarBadge(traduzirStatus(tarefa.status), tarefa.status, 'badge')
+    criarBadge(traduzirPrioridade(tarefa.prioridade), tarefa.prioridade, 'prioridade', 'Prioridade'),
+    criarBadge(traduzirStatus(tarefa.status), tarefa.status, 'badge', 'Status')
   );
 
   const datas = document.createElement('div');
@@ -364,6 +444,7 @@ function renderizar() {
   lista.innerHTML = '';
   listaCards.innerHTML = '';
   mensagem.textContent = '';
+  anuncioLista.textContent = '';
   atualizarResumo();
 
   const tarefasFiltradas = ordenarTarefas(filtrarTarefas());
@@ -371,6 +452,9 @@ function renderizar() {
     mensagem.textContent = 'Nenhuma tarefa encontrada.';
     return;
   }
+
+  const total = tarefasFiltradas.length;
+  anuncioLista.textContent = `${total} ${total === 1 ? 'tarefa exibida' : 'tarefas exibidas'}.`;
 
   tarefasFiltradas.forEach((tarefa, indice) => {
     const tr = document.createElement('tr');
@@ -425,6 +509,7 @@ async function salvarTarefa(event) {
 
   const tarefaAtual = tarefas.find((t) => t.id === tarefaEmEdicaoId);
   const estaEditando = Boolean(tarefaEmEdicaoId);
+  const idEditado = tarefaEmEdicaoId;
   const payload = {
     titulo:    document.getElementById('titulo').value,
     descricao: document.getElementById('descricao').value,
@@ -446,6 +531,7 @@ async function salvarTarefa(event) {
   fecharModal();
   mostrarToast(estaEditando ? 'Tarefa atualizada.' : 'Tarefa criada.', 'sucesso');
   await carregarTarefas();
+  if (estaEditando) focarBotaoDaTarefa(idEditado, '.editar');
 }
 
 async function alternarConclusao(tarefa) {
@@ -457,6 +543,7 @@ async function alternarConclusao(tarefa) {
   if (!response || !response.ok) { mostrarToast('Não foi possível atualizar o status.', 'erro'); return; }
   mostrarToast(novoStatus === 'concluida' ? 'Tarefa concluída!' : 'Tarefa reaberta.', 'sucesso');
   await carregarTarefas();
+  focarBotaoDaTarefa(tarefa.id, '.concluir, .desmarcar');
 }
 
 async function excluirTarefa(tarefa) {
@@ -478,6 +565,7 @@ async function excluirTarefa(tarefa) {
 
   mostrarToast('Tarefa excluída.', 'sucesso');
   await carregarTarefas();
+  if (tituloTarefas) tituloTarefas.focus();
 }
 
 // ============================================================
@@ -504,8 +592,12 @@ ordenacao.addEventListener('change', () => { ordenacaoAtual = ordenacao.value; r
 
 filtros.forEach((botao) => {
   botao.addEventListener('click', () => {
-    filtros.forEach((item) => item.classList.remove('ativo'));
+    filtros.forEach((item) => {
+      item.classList.remove('ativo');
+      item.setAttribute('aria-pressed', 'false');
+    });
     botao.classList.add('ativo');
+    botao.setAttribute('aria-pressed', 'true');
     filtroAtual = botao.dataset.filtro;
     renderizar();
   });
