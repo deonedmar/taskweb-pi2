@@ -73,9 +73,13 @@ const modalConfirmar = document.getElementById('modal-confirmar');
 const confirmarTexto = document.getElementById('confirmar-texto');
 const btnConfirmarSim = document.getElementById('btn-confirmar-sim');
 const btnConfirmarNao = document.getElementById('btn-confirmar-nao');
+const confirmarTitulo = document.getElementById('confirmar-titulo');
 
-function confirmarAcao(mensagemTexto) {
+function confirmarAcao(mensagemTexto, opcoes = {}) {
   return new Promise((resolve) => {
+    confirmarTitulo.textContent = opcoes.titulo || 'Confirmar ação';
+    btnConfirmarSim.textContent = opcoes.confirmar || 'Confirmar';
+    btnConfirmarNao.textContent = opcoes.cancelar || 'Cancelar';
     confirmarTexto.textContent = mensagemTexto;
 
     function limpar(resultado) {
@@ -212,6 +216,29 @@ function preencherFormularioNovaTarefa() {
   document.getElementById('prioridade').value = 'baixa';
 }
 
+let formularioInicial = '';
+
+function lerFormulario() {
+  return JSON.stringify([
+    document.getElementById('titulo').value,
+    document.getElementById('descricao').value,
+    document.getElementById('prazo').value,
+    document.getElementById('prioridade').value
+  ]);
+}
+
+// Fecha a janela da tarefa; se há algo digitado e não salvo, pergunta antes.
+async function tentarFecharModal() {
+  if (lerFormulario() !== formularioInicial) {
+    const descartar = await confirmarAcao(
+      'Você tem alterações não salvas. Se fechar agora, o que foi digitado será perdido.',
+      { titulo: 'Descartar alterações?', confirmar: 'Descartar', cancelar: 'Continuar editando' }
+    );
+    if (!descartar) return;
+  }
+  fecharModal();
+}
+
 function abrirModal(tarefa = null) {
   tarefaEmEdicaoId = tarefa ? tarefa.id : null;
   modalTitulo.textContent = tarefa ? 'Editar Tarefa' : 'Nova Tarefa';
@@ -226,7 +253,8 @@ function abrirModal(tarefa = null) {
     preencherFormularioNovaTarefa();
   }
 
-  abrirModalAcessivel(modal, document.getElementById('titulo'), fecharModal);
+  formularioInicial = lerFormulario();
+  abrirModalAcessivel(modal, document.getElementById('titulo'), tentarFecharModal);
 }
 
 function fecharModal() {
@@ -400,7 +428,18 @@ function criarBotoesAcao(tarefa) {
   excluir.setAttribute('aria-label', `Excluir tarefa: ${tarefa.titulo}`);
   excluir.addEventListener('click', () => excluirTarefa(tarefa));
 
-  botoes.append(concluir, editar, excluir);
+  const iniciarCronometro = document.createElement('button');
+  iniciarCronometro.className = 'foco';
+  iniciarCronometro.type = 'button';
+  iniciarCronometro.textContent = '▶';
+  iniciarCronometro.title = 'Iniciar foco (cronômetro)';
+  iniciarCronometro.setAttribute('aria-label', `Iniciar foco na tarefa: ${tarefa.titulo}`);
+  iniciarCronometro.addEventListener('click', () => {
+    if (typeof iniciarFoco === 'function') iniciarFoco(tarefa);
+  });
+
+  if (tarefaConcluida) botoes.append(concluir, editar, excluir);
+  else botoes.append(iniciarCronometro, concluir, editar, excluir);
   return botoes;
 }
 
@@ -548,7 +587,8 @@ async function alternarConclusao(tarefa) {
 
 async function excluirTarefa(tarefa) {
   const confirmou = await confirmarAcao(
-    `Deseja realmente excluir a tarefa "${tarefa.titulo}"? Essa ação não poderá ser desfeita.`
+    `Deseja realmente excluir a tarefa "${tarefa.titulo}"? Essa ação não poderá ser desfeita.`,
+    { titulo: 'Excluir tarefa', confirmar: 'Excluir', cancelar: 'Cancelar' }
   );
   if (!confirmou) return;
 
@@ -572,7 +612,7 @@ async function excluirTarefa(tarefa) {
 // Event listeners (inalterados)
 // ============================================================
 document.getElementById('btn-nova-tarefa').addEventListener('click', () => abrirModal());
-document.getElementById('btn-cancelar').addEventListener('click', fecharModal);
+document.getElementById('btn-cancelar').addEventListener('click', tentarFecharModal);
 document.getElementById('btn-fechar-detalhes').addEventListener('click', fecharDetalhes);
 let salvandoTarefa = false;
 
@@ -603,7 +643,7 @@ filtros.forEach((botao) => {
   });
 });
 
-modal.addEventListener('click', (event) => { if (event.target === modal) fecharModal(); });
+// A janela de nova tarefa/edição NÃO fecha ao clicar fora (evita perder o que foi digitado).
 modalDetalhes.addEventListener('click', (event) => { if (event.target === modalDetalhes) fecharDetalhes(); });
 
 carregarTarefas();

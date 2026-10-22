@@ -43,7 +43,10 @@
             <button type="button" data-filtro="atrasada" aria-pressed="false">Atrasadas</button>
           </div>
 
-          <button class="btn" id="btn-nova-tarefa" type="button">+ Nova tarefa</button>
+          <div class="filtros-acoes">
+            <a class="btn secondary" href="estatisticas.html"><span aria-hidden="true">📊</span> Estatísticas</a>
+            <button class="btn" id="btn-nova-tarefa" type="button">+ Nova tarefa</button>
+          </div>
         </div>
 
         <section class="tarefas">
@@ -134,9 +137,46 @@
       </div>
     </div>
 
+    <div id="modal-foco" class="modal" aria-hidden="true">
+      <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="foco-modal-titulo">
+        <h2 id="foco-modal-titulo">Iniciar foco</h2>
+        <p id="foco-modal-tarefa" style="margin: 8px 0 14px; color: #444;"></p>
+        <label for="foco-preset">Ritmo de foco e pausa</label>
+        <select id="foco-preset">
+          <option value="pomodoro">25 min de foco + 5 min de pausa</option>
+          <option value="longo">50 min de foco + 10 min de pausa</option>
+          <option value="curto">15 min de foco + 3 min de pausa</option>
+        </select>
+        <div class="modal-actions">
+          <button class="btn" id="btn-foco-iniciar" type="button">Iniciar</button>
+          <button class="btn secondary" id="btn-foco-cancelar" type="button">Cancelar</button>
+        </div>
+      </div>
+    </div>
+
+    <section id="painel-foco" class="painel-foco" aria-label="Cronômetro de foco" hidden>
+      <div class="foco-barra" aria-hidden="true"><span id="foco-progresso"></span></div>
+      <div class="foco-linha">
+        <div class="foco-info">
+          <span id="foco-modo" class="foco-modo">Foco</span>
+          <span id="foco-tarefa" class="foco-tarefa"></span>
+        </div>
+        <div id="foco-tempo" class="foco-tempo" role="timer" aria-label="Tempo restante">25:00</div>
+        <div class="foco-botoes">
+          <button type="button" id="btn-foco-pausar" class="principal">Pausar</button>
+          <button type="button" id="btn-foco-pular">Ir para a pausa</button>
+          <button type="button" id="btn-foco-parar">Parar</button>
+          <button type="button" id="btn-foco-falar">Ouvir tempo</button>
+        </div>
+      </div>
+    </section>
+    <div id="anuncio-foco" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></div>
+    <div id="alerta-foco" class="sr-only" role="alert" aria-atomic="true"></div>
+
     <div id="toast-container" class="toast-container" role="status" aria-live="polite"></div>
 
     <script src="./config.js"></script>
     <script src="./app.js"></script>
+    <script src="./foco.js"></script>
   </body>
 </html>

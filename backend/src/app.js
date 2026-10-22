@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const tarefasRoutes = require('./routes/tarefas');
 const authRoutes    = require('./routes/auth');
+const sessoesRoutes = require('./routes/sessoes');
 const autenticar   = require('./middleware/autenticar');
 
 const app = express();
@@ -13,6 +14,6 @@ app.use(express.json());
 app.use('/api/auth', authRoutes);
 
 // Rotas protegidas (exigem token JWT válido)
-app.use('/api', autenticar, tarefasRoutes);
+app.use('/api', autenticar, tarefasRoutes, sessoesRoutes);
 
 module.exports = app;

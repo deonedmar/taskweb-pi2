@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TaskWeb — Estatísticas</title>
+    <link rel="stylesheet" href="./styles.css">
+  </head>
+  <body>
+    <a class="skip-link" href="#conteudo-principal">Pular para o conteúdo principal</a>
+
+    <div class="app">
+      <main class="main" id="conteudo-principal" tabindex="-1">
+        <header class="topbar">
+          <h1>Estatísticas</h1>
+          <div class="topbar-acoes">
+            <a class="btn secondary" href="index.html"><span aria-hidden="true">←</span> Tarefas</a>
+            <button class="btn secondary" id="btn-sair" type="button">Sair</button>
+          </div>
+        </header>
+
+        <p id="estado" class="mensagem" role="status">Carregando estatísticas…</p>
+
+        <div id="conteudo" hidden>
+          <section class="stats-cards" aria-labelledby="t-resumo">
+            <h2 id="t-resumo" class="sr-only">Resumo geral</h2>
+            <div class="stat-card">
+              <h3>Total de tarefas</h3>
+              <p id="stat-total">0</p>
+              <small id="stat-total-nota"></small>
+            </div>
+            <div class="stat-card">
+              <h3>Taxa de conclusão</h3>
+              <p id="stat-taxa">0%</p>
+              <small id="stat-taxa-nota"></small>
+            </div>
+            <div class="stat-card">
+              <h3>Tempo total de foco</h3>
+              <p id="stat-foco">0 min</p>
+              <small id="stat-foco-nota"></small>
+            </div>
+            <div class="stat-card">
+              <h3>Sessões de foco</h3>
+              <p id="stat-sessoes">0</p>
+              <small id="stat-sessoes-nota"></small>
+            </div>
+          </section>
+
+          <p id="aviso-foco" class="stats-aviso" role="status" hidden></p>
+
+          <div class="stats-grade">
+            <section class="stats-painel" aria-labelledby="t-status">
+              <h2 id="t-status">Tarefas por status</h2>
+              <ul class="barras" id="barras-status"></ul>
+            </section>
+
+            <section class="stats-painel" aria-labelledby="t-prioridade">
+              <h2 id="t-prioridade">Tarefas por prioridade</h2>
+              <ul class="barras" id="barras-prioridade"></ul>
+            </section>
+
+            <section class="stats-painel" aria-labelledby="t-concluidas-dia">
+              <h2 id="t-concluidas-dia">Tarefas concluídas nos últimos 7 dias</h2>
+              <p class="stats-nota">Contadas pela data da última atualização de cada tarefa.</p>
+              <ul class="barras" id="barras-concluidas-dia"></ul>
+            </section>
+
+            <section class="stats-painel" aria-labelledby="t-foco-dia">
+              <h2 id="t-foco-dia">Tempo de foco nos últimos 7 dias</h2>
+              <ul class="barras" id="barras-foco-dia"></ul>
+            </section>
+
+            <section class="stats-painel" aria-labelledby="t-top">
+              <h2 id="t-top">Tarefas com mais tempo de foco</h2>
+              <ol class="lista-simples" id="lista-top"></ol>
+              <p class="stats-vazio" id="vazio-top" hidden>Ainda não há sessões de foco. Use o botão ▶ em uma tarefa para começar.</p>
+            </section>
+
+            <section class="stats-painel" aria-labelledby="t-prazos">
+              <h2 id="t-prazos">Próximos prazos (7 dias)</h2>
+              <ul class="lista-simples" id="lista-prazos"></ul>
+              <p class="stats-vazio" id="vazio-prazos" hidden>Nenhuma tarefa pendente com prazo nos próximos 7 dias.</p>
+            </section>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <script src="./config.js"></script>
+    <script src="./estatisticas.js"></script>
+  </body>
+</html>

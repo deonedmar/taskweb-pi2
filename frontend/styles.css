@@ -279,13 +279,18 @@ tr:hover {
   background: rgba(0, 0, 0, 0);
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.3s ease, background 0.3s ease;
+  /* visibility: hidden tira a janela fechada do teclado (Tab) e dos leitores de tela;
+     o atraso mantém o efeito de esmaecer ao fechar */
+  visibility: hidden;
+  transition: opacity 0.3s ease, background 0.3s ease, visibility 0s linear 0.3s;
 }
 
 .modal.show {
   opacity: 1;
   pointer-events: all;
   background: rgba(0, 0, 0, 0.5);
+  visibility: visible;
+  transition: opacity 0.3s ease, background 0.3s ease, visibility 0s;
 }
 
 .modal-content {
@@ -296,7 +301,9 @@ tr:hover {
   text-align: center;
   transform: translateY(40px) scale(0.95);
   opacity: 0;
-  transition: all 0.3s ease;
+  /* só movimento e opacidade: "all" também animava a visibilidade herdada
+     e deixava o conteúdo sem foco por ~300 ms após abrir */
+  transition: transform 0.3s ease, opacity 0.3s ease;
 }
 
 .modal.show .modal-content {
@@ -527,6 +534,287 @@ tr.saindo {
   outline: none;
 }
 
+/* ---------- Cronômetro de foco ---------- */
+.acao .foco {
+  background: #455a64;
+}
+
+.filtros-acoes {
+  display: flex;
+  align-items: stretch;
+  gap: 10px;
+}
+
+a.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  text-decoration: none;
+  text-align: center;
+}
+
+#modal-foco label {
+  display: block;
+  margin: 4px 0 6px;
+  font-weight: bold;
+}
+
+#modal-foco select {
+  width: 100%;
+  padding: 10px;
+  font: inherit;
+  margin-bottom: 14px;
+}
+
+.painel-foco {
+  position: fixed;
+  left: 50%;
+  bottom: 16px;
+  transform: translateX(-50%);
+  width: min(760px, calc(100% - 24px));
+  z-index: 900;
+  background: #263238;
+  color: #fff;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  padding: 16px 16px 14px;
+  overflow: hidden;
+}
+
+.painel-foco[hidden] {
+  display: none;
+}
+
+.foco-barra {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 5px;
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.foco-barra span {
+  display: block;
+  width: 0;
+  height: 100%;
+  background: #f2784b;
+  transition: width 0.25s linear;
+}
+
+.painel-foco[data-modo="pausa"] .foco-barra span {
+  background: #66bb6a;
+}
+
+.painel-foco[data-modo="pausa-longa"] .foco-barra span {
+  background: #81d4fa;
+}
+
+.foco-linha {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+}
+
+.foco-info {
+  flex: 1 1 150px;
+  min-width: 0;
+}
+
+.foco-modo {
+  display: block;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #cfd8dc;
+}
+
+.foco-tarefa {
+  display: block;
+  font-weight: bold;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.foco-tempo {
+  font-size: 36px;
+  font-weight: bold;
+  font-variant-numeric: tabular-nums;
+}
+
+.foco-botoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.foco-botoes button {
+  border: none;
+  border-radius: 6px;
+  padding: 9px 12px;
+  background: #eceff1;
+  color: #111;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.foco-botoes button.principal {
+  background: #fff;
+}
+
+.foco-botoes button:hover {
+  filter: brightness(0.93);
+}
+
+body.com-painel-foco {
+  padding-bottom: 150px;
+}
+
+/* ---------- Estatísticas ---------- */
+.topbar-acoes {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.stats-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.stat-card {
+  background: #37474f;
+  color: #fff;
+  border-radius: 8px;
+  padding: 18px 20px;
+}
+
+.stat-card h3 {
+  font-size: 14px;
+  font-weight: normal;
+  color: #cfd8dc;
+  margin-bottom: 8px;
+}
+
+.stat-card p {
+  font-size: 30px;
+  font-weight: bold;
+}
+
+.stat-card small {
+  display: block;
+  margin-top: 4px;
+  font-size: 13px;
+  color: #cfd8dc;
+}
+
+.stats-aviso {
+  background: #fff8e1;
+  border: 1px solid #ffe082;
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin-bottom: 16px;
+  color: #5d4037;
+}
+
+.stats-grade {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 16px;
+}
+
+.stats-painel {
+  background: #fff;
+  border-radius: 8px;
+  padding: 20px;
+}
+
+.stats-painel h2 {
+  font-size: 18px;
+  margin-bottom: 6px;
+}
+
+.stats-nota {
+  font-size: 13px;
+  color: #555;
+  margin-bottom: 12px;
+}
+
+.stats-vazio {
+  color: #555;
+  margin-top: 8px;
+}
+
+.barras,
+.lista-simples {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.stats-nota + .barras {
+  margin-top: 0;
+}
+
+.barra-item {
+  display: grid;
+  grid-template-columns: 96px 1fr auto;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+}
+
+.barra-trilho {
+  display: block;
+  height: 14px;
+  background: #eceff1;
+  border: 1px solid #90a4ae;
+  border-radius: 7px;
+  overflow: hidden;
+}
+
+.barra-preench {
+  display: block;
+  height: 100%;
+  background: #607d8b;
+}
+
+.barra-preench.concluida,
+.barra-preench.baixa { background: #4caf50; }
+.barra-preench.pendente,
+.barra-preench.media { background: #ffc107; }
+.barra-preench.atrasada,
+.barra-preench.alta { background: #f44336; }
+.barra-preench.foco { background: #f2784b; }
+
+.barra-valor {
+  min-width: 70px;
+  text-align: right;
+  font-weight: bold;
+  font-variant-numeric: tabular-nums;
+}
+
+.lista-simples li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #eee;
+  font-size: 14px;
+}
+
+.lista-simples strong {
+  white-space: nowrap;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .toast,
   tr.entrando,
@@ -578,6 +866,24 @@ tr.saindo {
 
   .filtros-bar .btn {
     width: 100%;
+  }
+
+  .filtros-acoes {
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .foco-botoes {
+    width: 100%;
+  }
+
+  .foco-botoes button {
+    flex: 1 1 auto;
+  }
+
+  .foco-tempo {
+    font-size: 32px;
   }
 
   .tarefas-controles {
