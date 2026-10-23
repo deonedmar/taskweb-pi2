@@ -64,7 +64,7 @@ body {
 
 .cards {
   display: grid;
-  grid-template-columns: repeat(3, minmax(180px, 1fr));
+  grid-template-columns: repeat(4, minmax(150px, 1fr));
   gap: 10px;
   margin-bottom: 20px;
 }
@@ -72,18 +72,42 @@ body {
 .card {
   min-height: 136px;
   padding: 36px 20px 20px;
+  border: none;
   border-radius: 8px;
   color: white;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: transform 0.12s ease, box-shadow 0.15s ease, filter 0.15s ease;
 }
 
-.card h3 {
+.card:hover {
+  filter: brightness(0.94);
+}
+
+.card:active {
+  transform: scale(0.97);
+}
+
+/* botão do filtro escolhido: anel duplo (não depende só da cor) */
+.card.ativo {
+  box-shadow: 0 0 0 3px #fff, 0 0 0 6px #263238;
+}
+
+.card-titulo {
+  display: block;
   margin: 0 0 18px;
   font-size: 20px;
+  font-weight: bold;
 }
 
-.card p {
-  margin: 0;
+.card-numero {
+  display: block;
   font-size: 16px;
+}
+
+.blue {
+  background: #546e7a;
 }
 
 .green {
@@ -100,29 +124,10 @@ body {
 
 .filtros-bar {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   align-items: center;
   gap: 16px;
   margin-bottom: 20px;
-}
-
-.filtros {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.filtros button {
-  padding: 8px 13px;
-  border: none;
-  border-radius: 20px;
-  cursor: pointer;
-  background: #ddd;
-}
-
-.filtros .ativo {
-  background: #f2784b;
-  color: white;
 }
 
 .tarefas {
@@ -488,15 +493,13 @@ tr.saindo {
 
 .acao button,
 .detalhes-btn,
-.btn,
-.filtros button {
+.btn {
   transition: transform 0.12s ease;
 }
 
 .acao button:active,
 .detalhes-btn:active,
-.btn:active,
-.filtros button:active {
+.btn:active {
   transform: scale(0.92);
 }
 
@@ -815,6 +818,17 @@ body.com-painel-foco {
   white-space: nowrap;
 }
 
+/* ---------- Fogos de artifício (conclusão de tarefa) ---------- */
+.fogos-canvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 2500;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .toast,
   tr.entrando,
@@ -855,7 +869,17 @@ body.com-painel-foco {
   }
 
   .cards {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .card {
+    min-height: 0;
+    padding: 18px 14px 14px;
+  }
+
+  .card-titulo {
+    margin-bottom: 8px;
+    font-size: 17px;
   }
 
   .filtros-bar,

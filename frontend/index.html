@@ -18,31 +18,29 @@
         </header>
 
         <section class="cards" aria-labelledby="titulo-resumo">
-          <h2 id="titulo-resumo" class="sr-only">Resumo das tarefas</h2>
-          <div class="card green">
-            <h3><span aria-hidden="true">✅</span> Concluídas</h3>
-            <p id="concluidas">0</p>
-          </div>
+          <h2 id="titulo-resumo" class="sr-only">Resumo das tarefas e filtro por status</h2>
+          <button type="button" class="card blue ativo" data-filtro="todas" aria-pressed="true">
+            <span class="card-titulo"><span aria-hidden="true">📋</span> Todas</span>
+            <span class="card-numero" id="todas">0</span>
+          </button>
 
-          <div class="card yellow">
-            <h3><span aria-hidden="true">⏰</span> Em andamento</h3>
-            <p id="andamento">0</p>
-          </div>
+          <button type="button" class="card green" data-filtro="concluida" aria-pressed="false">
+            <span class="card-titulo"><span aria-hidden="true">✅</span> Concluídas</span>
+            <span class="card-numero" id="concluidas">0</span>
+          </button>
 
-          <div class="card red">
-            <h3><span aria-hidden="true">❌</span> Atrasadas</h3>
-            <p id="atrasadas">0</p>
-          </div>
+          <button type="button" class="card yellow" data-filtro="pendente" aria-pressed="false">
+            <span class="card-titulo"><span aria-hidden="true">⏰</span> Em andamento</span>
+            <span class="card-numero" id="andamento">0</span>
+          </button>
+
+          <button type="button" class="card red" data-filtro="atrasada" aria-pressed="false">
+            <span class="card-titulo"><span aria-hidden="true">❌</span> Atrasadas</span>
+            <span class="card-numero" id="atrasadas">0</span>
+          </button>
         </section>
 
         <div class="filtros-bar">
-          <div class="filtros" role="group" aria-label="Filtrar tarefas por status">
-            <button class="ativo" type="button" data-filtro="todas" aria-pressed="true">Todas</button>
-            <button type="button" data-filtro="pendente" aria-pressed="false">Pendentes</button>
-            <button type="button" data-filtro="concluida" aria-pressed="false">Concluídas</button>
-            <button type="button" data-filtro="atrasada" aria-pressed="false">Atrasadas</button>
-          </div>
-
           <div class="filtros-acoes">
             <a class="btn secondary" href="estatisticas.html"><span aria-hidden="true">📊</span> Estatísticas</a>
             <button class="btn" id="btn-nova-tarefa" type="button">+ Nova tarefa</button>
@@ -178,5 +176,6 @@
     <script src="./config.js"></script>
     <script src="./app.js"></script>
     <script src="./foco.js"></script>
+    <script src="./fogos.js"></script>
   </body>
 </html>

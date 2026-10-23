@@ -43,7 +43,7 @@ const listaCards = document.getElementById('lista-tarefas-cards');
 const mensagem = document.getElementById('mensagem');
 const busca = document.getElementById('busca');
 const ordenacao = document.getElementById('ordenacao');
-const filtros = document.querySelectorAll('.filtros button');
+const filtros = document.querySelectorAll('[data-filtro]');
 const modalTitulo = document.getElementById('modal-titulo');
 const modalDetalhes = document.getElementById('modal-detalhes');
 const detalhesTitulo = document.getElementById('detalhes-titulo');
@@ -385,6 +385,7 @@ function atualizarResumo() {
   const concluidas = tarefas.filter((t) => t.status === 'concluida').length;
   const atrasadas  = tarefas.filter((t) => t.status === 'atrasada').length;
   const andamento  = tarefas.filter((t) => t.status === 'pendente').length;
+  document.getElementById('todas').textContent      = tarefas.length;
   document.getElementById('concluidas').textContent = concluidas;
   document.getElementById('andamento').textContent  = andamento;
   document.getElementById('atrasadas').textContent  = atrasadas;
@@ -410,7 +411,7 @@ function criarBotoesAcao(tarefa) {
   concluir.textContent = tarefaConcluida ? '↩' : '✓';
   concluir.title = tarefaConcluida ? 'Desmarcar conclusão' : 'Marcar como concluída';
   concluir.setAttribute('aria-label', `${tarefaConcluida ? 'Reabrir tarefa' : 'Marcar como concluída'}: ${tarefa.titulo}`);
-  concluir.addEventListener('click', () => alternarConclusao(tarefa));
+  concluir.addEventListener('click', () => alternarConclusao(tarefa, concluir));
 
   const editar = document.createElement('button');
   editar.className = 'editar';
@@ -573,14 +574,16 @@ async function salvarTarefa(event) {
   if (estaEditando) focarBotaoDaTarefa(idEditado, '.editar');
 }
 
-async function alternarConclusao(tarefa) {
+async function alternarConclusao(tarefa, botao) {
   const novoStatus = tarefa.status === 'concluida' ? 'pendente' : 'concluida';
+  const origemFogos = botao ? botao.getBoundingClientRect() : null; // posição do botão, antes da lista ser redesenhada
   const response = await fetchAuth(`${API_URL}/${tarefa.id}`, {
     method: 'PUT',
     body: JSON.stringify({ status: novoStatus })
   });
   if (!response || !response.ok) { mostrarToast('Não foi possível atualizar o status.', 'erro'); return; }
   mostrarToast(novoStatus === 'concluida' ? 'Tarefa concluída!' : 'Tarefa reaberta.', 'sucesso');
+  if (novoStatus === 'concluida' && typeof dispararFogos === 'function') dispararFogos(origemFogos);
   await carregarTarefas();
   focarBotaoDaTarefa(tarefa.id, '.concluir, .desmarcar');
 }
